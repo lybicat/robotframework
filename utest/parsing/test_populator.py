@@ -510,6 +510,16 @@ class ForLoopPopulatingTest(_PopulatorTest):
         assert_equal(len(test.steps), 2)
         assert_equal(test.steps[0].steps, [])
 
+class ParallelPopulatingTest(_PopulatorTest):
+
+    def test_single_parallel(self):
+        self._create_table('Test cases', [['Parallel test'],
+                                          ['', ':PARALLEL'],
+                                          ['', '', 'Log', 'worker-1'],
+                                          ['', '', 'Log', 'worker-2']])
+        assert_equal(len(self._first_test().steps), 1)
+        parallel_step = self._first_test().steps[0]
+        assert_equal(len(parallel_step.steps), 2)
 
 class TestPopulatingComments(_PopulatorTest):
 

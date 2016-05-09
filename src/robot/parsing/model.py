@@ -557,6 +557,10 @@ class TestCase(_WithSteps, _WithSettings):
         self.steps.append(ForLoop(declaration, comment))
         return self.steps[-1]
 
+    def add_parallel(self, declaration, comment=None):
+        self.steps.append(Parallel(declaration, comment))
+        return self.steps[-1]
+
     def report_invalid_syntax(self, message, level='ERROR'):
         type_ = 'test case' if type(self) is TestCase else 'keyword'
         message = "Invalid syntax in %s '%s': %s" % (type_, self.name, message)
@@ -647,6 +651,28 @@ class ForLoop(_WithSteps):
     def as_list(self, indent=False, include_comment=True):
         comments = self.comment.as_list() if include_comment else []
         return  [': FOR'] + self.vars + [self.flavor] + self.items + comments
+
+    def __iter__(self):
+        return iter(self.steps)
+
+    def is_set(self):
+        return True
+
+
+class Parallel(_WithSteps):
+    def __init__(self, declaration, comment=None):
+        self.comment = Comment(comment)
+        self.steps = []
+
+    def is_comment(self):
+        return False
+
+    def is_for_loop(self):
+        return False
+
+    def as_list(self, indent=False, include_comment=True):
+        comments = self.comment.as_list() if include_comment else []
+        return  [': PARALLEL'] + comments
 
     def __iter__(self):
         return iter(self.steps)

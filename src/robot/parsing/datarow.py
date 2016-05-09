@@ -72,6 +72,11 @@ class DataRow(object):
             return self.head.replace(':', '').replace(' ', '').upper() == 'FOR'
         return False
 
+    def starts_parallel(self):
+        if self.head and self.head.startswith(':'):
+            return self.head.replace(':', '').replace(' ', '').upper() == 'PARALLEL'
+        return False
+
     def starts_test_or_user_keyword_setting(self):
         head = self.head
         return head and head[0] == '[' and head[-1] == ']'
