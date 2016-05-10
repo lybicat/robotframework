@@ -557,8 +557,8 @@ class TestCase(_WithSteps, _WithSettings):
         self.steps.append(ForLoop(declaration, comment))
         return self.steps[-1]
 
-    def add_parallel(self, declaration, comment=None):
-        self.steps.append(Parallel(declaration, comment))
+    def add_parallel(self):
+        self.steps.append(Parallel())
         return self.steps[-1]
 
     def report_invalid_syntax(self, message, level='ERROR'):
@@ -660,8 +660,7 @@ class ForLoop(_WithSteps):
 
 
 class Parallel(_WithSteps):
-    def __init__(self, declaration, comment=None):
-        self.comment = Comment(comment)
+    def __init__(self):
         self.steps = []
 
     def is_comment(self):
@@ -671,8 +670,7 @@ class Parallel(_WithSteps):
         return False
 
     def as_list(self, indent=False, include_comment=True):
-        comments = self.comment.as_list() if include_comment else []
-        return  [': PARALLEL'] + comments
+        return  [': PARALLEL']
 
     def __iter__(self):
         return iter(self.steps)
