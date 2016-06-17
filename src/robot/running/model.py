@@ -84,6 +84,13 @@ class ForLoop(Keyword):
         return self.args
 
 
+class Parallel(Keyword):
+    keyword_class = Keyword  #: Internal usage only.
+
+    def __init__(self):
+        Keyword.__init__(self, assign=(), args=(), type=Keyword.PARALLEL_TYPE)
+
+
 class TestCase(model.TestCase):
     """Represents a single executable test case.
 

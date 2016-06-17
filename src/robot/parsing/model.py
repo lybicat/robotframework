@@ -501,6 +501,9 @@ class Variable(object):
     def is_for_loop(self):
         return False
 
+    def is_parallel(self):
+        return False
+
     def has_data(self):
         return bool(self.name or ''.join(self.value))
 
@@ -648,6 +651,9 @@ class ForLoop(_WithSteps):
     def is_for_loop(self):
         return True
 
+    def is_parallel(self):
+        return False
+
     def as_list(self, indent=False, include_comment=True):
         comments = self.comment.as_list() if include_comment else []
         return  [': FOR'] + self.vars + [self.flavor] + self.items + comments
@@ -668,6 +674,9 @@ class Parallel(_WithSteps):
 
     def is_for_loop(self):
         return False
+
+    def is_parallel(self):
+        return True
 
     def as_list(self, indent=False, include_comment=True):
         return  [': PARALLEL']
@@ -697,6 +706,9 @@ class Step(object):
         return not (self.assign or self.name or self.args)
 
     def is_for_loop(self):
+        return False
+
+    def is_parallel(self):
         return False
 
     def is_set(self):

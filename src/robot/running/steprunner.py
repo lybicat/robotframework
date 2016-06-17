@@ -50,6 +50,7 @@ class StepRunner(object):
         if step.type == step.FOR_LOOP_TYPE:
             runner = ForRunner(context, self._templated, step.flavor)
             return runner.run(step)
+        # TODO: for parallel
         runner = context.get_runner(name or step.name)
         if context.dry_run:
             return runner.dry_run(step, context)

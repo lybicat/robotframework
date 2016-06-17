@@ -35,6 +35,7 @@ class Keyword(ModelObject):
     SETUP_TYPE = 'setup'        #: Setup :attr:`type`.
     TEARDOWN_TYPE = 'teardown'  #: Teardown :attr:`type`.
     FOR_LOOP_TYPE = 'for'       #: For loop :attr:`type`.
+    PARALLEL_TYPE = 'parallel'  #: Parallel :attr:`type`.
     FOR_ITEM_TYPE = 'foritem'   #: Single for loop iteration :attr:`type`.
     keyword_class = None        #: Internal usage only.
     message_class = Message     #: Internal usage only.

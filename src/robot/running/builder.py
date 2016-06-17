@@ -18,7 +18,7 @@ from robot.running.defaults import TestDefaults
 from robot.utils import abspath, is_string, unic
 from robot.variables import VariableIterator
 
-from .model import ForLoop, Keyword, ResourceFile, TestSuite
+from .model import ForLoop, Parallel, Keyword, ResourceFile, TestSuite
 
 
 class TestSuiteBuilder(object):
@@ -183,6 +183,8 @@ class StepBuilder(object):
     def _build(self, data, template=None, kw_type='kw'):
         if data.is_for_loop():
             return self._build_for_loop(data, template)
+        if data.is_parallel():
+            return self._build_parallel(data, template)
         if template:
             return self._build_templated_step(data, template)
         return self._build_normal_step(data, kw_type)
@@ -193,6 +195,12 @@ class StepBuilder(object):
                        flavor=data.flavor)
         self.build_steps(loop, data, template)
         return loop
+
+    def _build_parallel(self, data, template):
+        # TODO:
+        parallel = Parallel()
+        self.build_steps(parallel, data, template)
+        return parallel
 
     def _build_templated_step(self, data, template):
         args = data.as_list(include_comment=False)

@@ -62,6 +62,12 @@ class TestBuilding(unittest.TestCase):
         kw = build('pass_and_fail.robot').tests[0].keywords[0]
         assert_keyword(kw, (), 'My Keyword', ('Pass',))
 
+    def test_parallel_steps(self):
+        kw = build('../running/parallel.robot').tests[0].keywords[1]
+        assert_equal(kw.name, '')
+        assert_equal(kw.type, 'parallel')
+        assert_equal(len(kw.children), 2)
+
     def test_assign(self):
         kw = build('unicode.robot').tests[1].keywords[0]
         assert_keyword(kw, ('${msg} =',), 'Evaluate', (r"u'Fran\\xe7ais'",))
