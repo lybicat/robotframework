@@ -69,6 +69,30 @@ def ForRunner(context, templated=False, flavor='IN'):
     return runner(context, templated)
 
 
+class ParallelRunner(object):
+    def __init__(self, context, templated=False):
+        self._context = context
+        self._templated = templated
+
+    def run(self, data, name=None):
+        result = KeywordResult(kwname='In Parallel',
+                               type=data.PARALLEL_TYPE)
+        with StatusReporter(self._context, result):
+            self._validate(data)
+            self._run(data)
+
+    def _validate(self, data):
+        if not data.keywords:
+            raise DataError('Parallel contains no keywords.')
+
+    def _run(self, data):
+        result = KeywordResult(kwname='parallel',
+                               type=data.PARALLEL_TYPE)
+        runner = StepRunner(self._context, self._templated)
+        with StatusReporter(self._context, result):
+            runner.run_steps(data.keywords)
+
+
 class ForInRunner(object):
 
     def __init__(self, context, templated=False):
