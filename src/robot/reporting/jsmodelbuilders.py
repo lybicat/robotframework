@@ -119,7 +119,7 @@ class TestBuilder(_Builder):
 
 
 class KeywordBuilder(_Builder):
-    _types = {'kw': 0, 'setup': 1, 'teardown': 2, 'for': 3, 'foritem': 4}
+    _types = {'kw': 0, 'setup': 1, 'teardown': 2, 'for': 3, 'foritem': 4, 'parallel': 5}
 
     def __init__(self, context):
         _Builder.__init__(self, context)

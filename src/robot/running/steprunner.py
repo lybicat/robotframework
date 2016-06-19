@@ -51,6 +51,9 @@ class StepRunner(object):
             runner = ForRunner(context, self._templated, step.flavor)
             return runner.run(step)
         # TODO: for parallel
+        if step.type == step.PARALLEL_TYPE:
+            runner = ParallelRunner(context, self._templated)
+            return runner.run(step)
         runner = context.get_runner(name or step.name)
         if context.dry_run:
             return runner.dry_run(step, context)
@@ -74,19 +77,12 @@ class ParallelRunner(object):
         self._context = context
         self._templated = templated
 
-    def run(self, data, name=None):
-        result = KeywordResult(kwname='In Parallel',
-                               type=data.PARALLEL_TYPE)
-        with StatusReporter(self._context, result):
-            self._validate(data)
-            self._run(data)
-
     def _validate(self, data):
         if not data.keywords:
             raise DataError('Parallel contains no keywords.')
 
-    def _run(self, data):
-        result = KeywordResult(kwname='parallel',
+    def run(self, data):
+        result = KeywordResult(kwname='',
                                type=data.PARALLEL_TYPE)
         runner = StepRunner(self._context, self._templated)
         with StatusReporter(self._context, result):
