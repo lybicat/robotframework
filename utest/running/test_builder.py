@@ -136,3 +136,6 @@ class TestTemplates(unittest.TestCase):
         assert_keyword(test.keywords[0], (), 'Expect Exactly Three Args',
                        ('${SAME VARIABLE}', 'Variable content', '${VARIABLE}'))
         assert_equal(test.template, 'Expect Exactly Three Args')
+
+if __name__ == '__main__':
+    unittest.main()

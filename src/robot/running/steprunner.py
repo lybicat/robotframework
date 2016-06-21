@@ -52,7 +52,7 @@ class StepRunner(object):
             return runner.run(step)
         # TODO: for parallel
         if step.type == step.PARALLEL_TYPE:
-            runner = ParallelRunner(context)
+            runner = ParallelRunner(context, self._templated)
             return runner.run(step)
         runner = context.get_runner(name or step.name)
         if context.dry_run:
@@ -70,6 +70,23 @@ def ForRunner(context, templated=False, flavor='IN'):
     except KeyError:
         return InvalidForRunner(context, flavor)
     return runner(context, templated)
+
+
+class ParallelRunner(object):
+    def __init__(self, context, templated=False):
+        self._context = context
+        self._templated = templated
+
+    def _validate(self, data):
+        if not data.keywords:
+            raise DataError('Parallel contains no keywords.')
+
+    def run(self, data):
+        result = KeywordResult(kwname='',
+                               type=data.PARALLEL_TYPE)
+        runner = StepRunner(self._context, self._templated)
+        with StatusReporter(self._context, result):
+            runner.run_steps(data.keywords)
 
 
 class ForInRunner(object):
@@ -273,20 +290,4 @@ class InvalidForRunner(ForInRunner):
         raise DataError("Invalid FOR loop type '%s'. Expected 'IN', "
                         "'IN RANGE', 'IN ZIP', or 'IN ENUMERATE'."
                         % self.flavor)
-
-
-class ParallelRunner(object):
-    def __init__(self, context):
-        self._context = context
-
-    def run(self, data):
-        # TODO: run steps parallel
-        result = KeywordResult(kwname=self._get_name(data),
-                    type=data.KEYWORD_TYPE) # TODO: may have data.PARALLEL_TYPE KeywordResult type later
-        with StatusReporter(self._context, result):
-            runner = StepRunner(self._context)
-            runner.run_steps(data.keywords)
-
-    def _get_name(self, data):
-        return ':PARALLEL'
 
