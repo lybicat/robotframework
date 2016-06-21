@@ -51,6 +51,9 @@ class StepRunner(object):
             runner = ForRunner(context, self._templated, step.flavor)
             return runner.run(step)
         # TODO: for parallel
+        if step.type == step.PARALLEL_TYPE:
+            runner = ParallelRunner(context)
+            return runner.run(step)
         runner = context.get_runner(name or step.name)
         if context.dry_run:
             return runner.dry_run(step, context)
@@ -270,3 +273,20 @@ class InvalidForRunner(ForInRunner):
         raise DataError("Invalid FOR loop type '%s'. Expected 'IN', "
                         "'IN RANGE', 'IN ZIP', or 'IN ENUMERATE'."
                         % self.flavor)
+
+
+class ParallelRunner(object):
+    def __init__(self, context):
+        self._context = context
+
+    def run(self, data):
+        # TODO: run steps parallel
+        result = KeywordResult(kwname=self._get_name(data),
+                    type=data.KEYWORD_TYPE) # TODO: may have data.PARALLEL_TYPE KeywordResult type later
+        with StatusReporter(self._context, result):
+            runner = StepRunner(self._context)
+            runner.run_steps(data.keywords)
+
+    def _get_name(self, data):
+        return ':PARALLEL'
+

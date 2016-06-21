@@ -110,6 +110,13 @@ class TestRunning(unittest.TestCase):
         assert_suite(result, 'Suite', 'PASS', tests=1)
 
 
+class TestParallelRunning(unittest.TestCase):
+    def test_parallel_steps_in_suite(self):
+        suite = build('../running/parallel.robot')
+        result = run(suite)
+        assert_suite(result, 'Parallel', 'PASS', tests=1)
+
+
 class TestTestSetupAndTeardown(unittest.TestCase):
 
     def setUp(self):
