@@ -5,12 +5,8 @@ import unittest
 from os.path import abspath, dirname, join
 
 from robot.running import TestSuite, TestSuiteBuilder
-from robot.running.runner import Runner
-from robot.conf.settings import RobotSettings
 from robot.utils import StringIO
 from robot.utils.asserts import assert_equal
-from robot.output.output import Output
-from robot.running.steprunner import ParallelRunner
 
 from resources.runningtestcase import RunningTestCase
 from resources.Listener import Listener
@@ -27,15 +23,6 @@ def run(suite, **kwargs):
     config.update(kwargs)
     result = suite.run(**config)
     return result.suite
-
-
-def get_suite_runner(suite):
-    config = dict(output=None, log=None, report=None,
-                  stdout=StringIO(), stderr=StringIO())
-    settings = RobotSettings(config)
-    runner = Runner(Output(settings), settings)
-    runner.start_suite(suite)
-    return runner
 
 
 def build(path):
@@ -123,12 +110,11 @@ class TestRunning(unittest.TestCase):
         assert_suite(result, 'Suite', 'PASS', tests=1)
 
 
-class TestParallel(unittest.TestCase):
-    def test_parallel_can_be_run(self):
+class TestParallelRunning(unittest.TestCase):
+    def test_parallel_steps_in_suite(self):
         suite = build('../running/parallel.robot')
-        test = suite.tests[0]
-        runner = get_suite_runner(suite)
-        ParallelRunner(runner._context).run(test.keywords.normal[1])
+        result = run(suite)
+        assert_suite(result, 'Parallel', 'PASS', tests=1)
 
 
 class TestTestSetupAndTeardown(unittest.TestCase):
