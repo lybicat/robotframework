@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 from robot.errors import DataError
-from robot.utils import XmlWriter, NullMarkupWriter, get_timestamp, unic
+from robot.utils import XmlWriter, NullMarkupWriter, get_timestamp, unic, lazy_writer
 from robot.version import get_full_version
 from robot.result.visitor import ResultVisitor
 
 from .loggerhelper import IsLogged
+# from robot.output import LOGGER
 
 
 class XmlLogger(ResultVisitor):
@@ -66,6 +67,8 @@ class XmlLogger(ResultVisitor):
         self._writer.element('msg', msg.message, attrs)
 
     def start_keyword(self, kw):
+        if not kw:
+            return
         attrs = {'name': kw.kwname, 'library': kw.libname}
         if kw.type != 'kw':
             attrs['type'] = kw.type
@@ -76,6 +79,8 @@ class XmlLogger(ResultVisitor):
         self._write_list('assign', 'var', kw.assign)
 
     def end_keyword(self, kw):
+        if not kw:
+            return
         if kw.timeout:
             self._writer.element('timeout', attrs={'value': unic(kw.timeout)})
         self._write_status(kw)
