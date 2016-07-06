@@ -58,15 +58,12 @@ class Output(AbstractLogger):
     def end_test(self, test):
         LOGGER.end_test(test)
 
-    @lazy_writer
     def start_keyword(self, kw):
         LOGGER.start_keyword(kw)
 
-    @lazy_writer
     def end_keyword(self, kw):
         LOGGER.end_keyword(kw)
 
-    @lazy_writer
     def message(self, msg):
         LOGGER.log_message(msg)
 

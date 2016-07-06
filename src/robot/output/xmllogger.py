@@ -18,8 +18,7 @@ from robot.version import get_full_version
 from robot.result.visitor import ResultVisitor
 
 from .loggerhelper import IsLogged
-# from robot.output import LOGGER
-
+from threading import current_thread
 
 class XmlLogger(ResultVisitor):
 
@@ -56,6 +55,7 @@ class XmlLogger(ResultVisitor):
         if self._error_message_is_logged(msg.level):
             self._errors.append(msg)
 
+    @lazy_writer
     def log_message(self, msg):
         if self._log_message_is_logged(msg.level):
             self._write_message(msg)
@@ -66,6 +66,7 @@ class XmlLogger(ResultVisitor):
             attrs['html'] = 'yes'
         self._writer.element('msg', msg.message, attrs)
 
+    @lazy_writer
     def start_keyword(self, kw):
         if not kw:
             return
@@ -78,6 +79,7 @@ class XmlLogger(ResultVisitor):
         self._write_list('arguments', 'arg', [unic(a) for a in kw.args])
         self._write_list('assign', 'var', kw.assign)
 
+    @lazy_writer
     def end_keyword(self, kw):
         if not kw:
             return

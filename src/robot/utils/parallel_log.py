@@ -30,7 +30,7 @@ class ParallelLogNode(object):
     def __init__(self, name):
         self.name = name
         self.start_keyword = None
-        self.message = None
+        self.log_message = []
         self.end_keyword = None
         self.children = []
 
@@ -42,7 +42,7 @@ class ParallelLogNode(object):
 def post_order(n, children, obj):
     getattr(obj, 'start_keyword')(n.start_keyword)
     if not children:
-        getattr(obj, 'message')(n.message)
+        map(lambda x: getattr(obj, 'message')(x), n.log_message)
         return
     for c in children:
         post_order(c, c.children, obj)
@@ -56,5 +56,9 @@ def lazy_writer(f):
             f(self, args)
         else:
             copied_args = copy.copy(args)
+            if f.__name__ is 'log_message':
+                ori = getattr(ParallelLogNode(cur_thread_name), f.__name__)
+                ori.append(copied_args)
+                copied_args = ori
             setattr(ParallelLogNode(cur_thread_name), f.__name__, copied_args)
     return deco
