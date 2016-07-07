@@ -11,6 +11,16 @@ Simple Parallel
     Check Log Message    ${tc.kws[1].kws[1].msgs[0]}    worker-2
     Check Log Message    ${tc.kws[2].msgs[0]}    Not in Parallel anymore
 
+Complex Parallel
+    ${tc} =    Check Test Case    ${TEST NAME}
+    Check Log Message    ${tc.kws[0].msgs[0]}    Not yet in Parallel
+    Should Be Parallel Keyword  ${tc.kws[1]}    3
+    Check Log Message    ${tc.kws[1].kws[0].msgs[0]}    worker-1
+    Check Log Message    ${tc.kws[1].kws[1].kws[0].msgs[0]}    worker-1.1
+    Check Log Message    ${tc.kws[1].kws[1].kws[1].msgs[0]}    worker-1.2
+    Check Log Message    ${tc.kws[1].kws[2].msgs[0]}    worker-2
+    Check Log Message    ${tc.kws[2].msgs[0]}    Not in Parallel anymore
+
 *** Keywords ***
 Should Be Parallel Keyword
     [Arguments]    ${kw}    ${subcount}

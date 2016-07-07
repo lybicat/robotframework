@@ -22,13 +22,29 @@ from robot.variables import is_scalar_var
 from .statusreporter import StatusReporter
 
 from threading import Thread, current_thread
+
+from Queue import Queue
 # from robot.output import LOGGER
+
+namedQueue = {}
 
 
 class MyThread(Thread):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, bucket=None, group=None, target=None, name=None, args=(), kwargs={}):
         self.parent = current_thread().name
-        Thread.__init__(self, *args, **kwargs)
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self.bucket = bucket
+        self._target = target
+        self._args = args
+        self._kwargs = kwargs
+
+    def run(self):
+        try:
+            self._target(*self._args, **self._kwargs)
+        except BaseException as e:
+            self.bucket.put(e)
+        finally:
+            del self._target, self._args, self._kwargs
 
 
 class StepRunner(object):
@@ -62,7 +78,6 @@ class StepRunner(object):
         if step.type == step.FOR_LOOP_TYPE:
             runner = ForRunner(context, self._templated, step.flavor)
             return runner.run(step)
-        # TODO: for parallel
         if step.type == step.PARALLEL_TYPE:
             runner = ParallelRunner(context, self._templated)
             return runner.run(step)
@@ -74,15 +89,25 @@ class StepRunner(object):
     def run_steps_parallel(self, steps):
         errors = []
         threads = []
+        bucket = Queue()
+        namedQueue[current_thread().name] = bucket
         try:
             for step in steps:
-                threads.append(MyThread(target=self.run_step, args=(step,)))
+                threads.append(MyThread(bucket=bucket, target=self.run_step, args=(step,)))
             map(lambda x: x.start(), threads)
             map(lambda x: x.join(), threads)
             if current_thread().name == 'MainThread':
                 root = ParallelLogNode('MainThread')
                 # raise(Exception([c.name for c in root.children[1].children]))
                 post_order(root, root.children, self._context.output)
+                root.children = []
+                if not bucket.empty():
+                    raise bucket.get_nowait()
+            else:
+                if not bucket.empty():
+                    error = bucket.get_nowait()
+                    namedQueue[current_thread().parent].put(error)
+                    raise error
         except ExecutionPassed as exception:
             exception.set_earlier_failures(errors)
             raise exception
