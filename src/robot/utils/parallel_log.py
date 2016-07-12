@@ -38,17 +38,27 @@ class ParallelLogNode(object):
         self.children.append(obj)
 
 
-def post_order(n, children, obj):
-    getattr(obj, 'start_keyword')(n.start_keyword)
+def post_order(n, children, visitor):
+    """Visit a general tree in post order.
+    Args:
+        n: root node of a general tree
+        children: children of node n
+        visitor: visitor function
+    Returns: None
+    """
+    getattr(visitor, 'start_keyword')(n.start_keyword)
     if not children:
-        map(lambda x: getattr(obj, 'message')(x), n.log_message)
+        map(lambda x: getattr(visitor, 'message')(x), n.log_message)
         return
     for c in children:
-        post_order(c, c.children, obj)
-        getattr(obj, 'end_keyword')(c.end_keyword)
+        post_order(c, c.children, visitor)
+        getattr(visitor, 'end_keyword')(c.end_keyword)
 
 
 def lazy_writer(f):
+    """Decorator. Save write call arguments to members of a tree node
+    when current thread is not MainThread.
+    """
     def deco(self, arg):
         cur_thread_name = current_thread().name
         if cur_thread_name == 'MainThread':
