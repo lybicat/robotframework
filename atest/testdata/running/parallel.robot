@@ -23,11 +23,11 @@ Complex Parallel With Fail
     \    Log    worker-2
 
 Complex Parallel With Multiple Fail
-    [Documentation]    FAIL    Here we Fail
+    [Documentation]    FAIL    Fail in Outside
     : PARALLEL
-    \    Fail    Here we Fail
     \    Nested Parallel With Fail
     \    Log    worker-2
+    \    Fail    Fail in Outside
 
 Parallel Failing 1
     [Documentation]    FAIL    Here we Fail

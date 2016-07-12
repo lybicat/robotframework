@@ -34,13 +34,13 @@ Complex Parallel With Fail
 Complex Parallel With Multiple Fail
     ${tc} =    Check Test Case  ${TEST NAME}
     Should Be Parallel Keyword  ${tc.kws[0]}    3
+    Should Be Parallel Keyword  ${tc.kws[0].kws[0]}    3
     Should Be Equal    ${tc.kws[0].kws[0].status}    FAIL
-    Should Be Parallel Keyword  ${tc.kws[0].kws[1]}    3
-    Should Be Equal    ${tc.kws[0].kws[1].status}    FAIL
-    Check Log Message    ${tc.kws[0].kws[1].kws[0].msgs[0]}    worker-1.1
-    Should Be Equal  ${tc.kws[0].kws[1].kws[1].status}    FAIL
-    Check Log Message    ${tc.kws[0].kws[1].kws[2].msgs[0]}    worker-1.2
-    Check Log Message    ${tc.kws[0].kws[2].msgs[0]}    worker-2
+    Check Log Message    ${tc.kws[0].kws[0].kws[0].msgs[0]}    worker-1.1
+    Should Be Equal  ${tc.kws[0].kws[0].kws[1].status}    FAIL
+    Check Log Message    ${tc.kws[0].kws[0].kws[2].msgs[0]}    worker-1.2
+    Check Log Message    ${tc.kws[0].kws[1].msgs[0]}    worker-2
+    Should Be Equal    ${tc.kws[0].kws[2].status}    FAIL
 
 Parallel Failing
     ${tc} =    Check Test Case    ${TEST NAME} 1
