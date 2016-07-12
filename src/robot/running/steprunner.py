@@ -24,7 +24,6 @@ from .statusreporter import StatusReporter
 from threading import Thread, current_thread
 
 from Queue import Queue
-# from robot.output import LOGGER
 
 namedQueue = {}
 
@@ -71,8 +70,7 @@ class StepRunner(object):
             raise ExecutionFailures(errors)
 
     def run_step(self, step, name=None):
-        if current_thread().name != 'MainThread':
-            # LOGGER.info('Add %s as child of %s' % (current_thread().name, current_thread().parent))
+        if current_thread().name.startswith('Thread'):
             ParallelLogNode(current_thread().parent).add_child(ParallelLogNode(current_thread().name))
         context = self._context
         if step.type == step.FOR_LOOP_TYPE:
@@ -98,7 +96,6 @@ class StepRunner(object):
             map(lambda x: x.join(), threads)
             if current_thread().name == 'MainThread':
                 root = ParallelLogNode('MainThread')
-                # raise(Exception([c.name for c in root.children[1].children]))
                 post_order(root, root.children, self._context.output)
                 root.children = []
                 if not bucket.empty():

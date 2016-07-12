@@ -1,4 +1,3 @@
-import copy
 import functools
 from threading import current_thread
 
@@ -50,15 +49,14 @@ def post_order(n, children, obj):
 
 
 def lazy_writer(f):
-    def deco(self, args):
+    def deco(self, arg):
         cur_thread_name = current_thread().name
         if cur_thread_name == 'MainThread':
-            f(self, args)
+            f(self, arg)
         else:
-            copied_args = copy.copy(args)
             if f.__name__ is 'log_message':
                 ori = getattr(ParallelLogNode(cur_thread_name), f.__name__)
-                ori.append(copied_args)
-                copied_args = ori
-            setattr(ParallelLogNode(cur_thread_name), f.__name__, copied_args)
+                ori.append(arg)
+                arg = ori
+            setattr(ParallelLogNode(cur_thread_name), f.__name__, arg)
     return deco

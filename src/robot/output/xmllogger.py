@@ -18,7 +18,7 @@ from robot.version import get_full_version
 from robot.result.visitor import ResultVisitor
 
 from .loggerhelper import IsLogged
-from threading import current_thread
+
 
 class XmlLogger(ResultVisitor):
 
@@ -81,8 +81,6 @@ class XmlLogger(ResultVisitor):
 
     @lazy_writer
     def end_keyword(self, kw):
-        if not kw:
-            return
         if kw.timeout:
             self._writer.element('timeout', attrs={'value': unic(kw.timeout)})
         self._write_status(kw)

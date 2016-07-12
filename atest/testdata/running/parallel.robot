@@ -9,38 +9,36 @@ Simple Parallel
     \    Log    worker-2
     Log    Not in Parallel anymore
 
-Complex Parallel With Fail
-    Log    Not yet in Parallel
-    : PARALLEL
-    \    Log    worker-1
-    \    Nested Parallel With Fail
-    \    Log    worker-2
-    Log    Not in Parallel anymore
-
 Complex Parallel
-    Log    Not yet in Parallel
     : PARALLEL
     \    Log    worker-1
     \    Nested Parallel
     \    Log    worker-2
-    Log    Not in Parallel anymore
+
+Complex Parallel With Fail
+    [Documentation]  FAIL    Here we Fail
+    : PARALLEL
+    \    Log    worker-1
+    \    Nested Parallel With Fail
+    \    Log    worker-2
 
 Complex Parallel With Multiple Fail
-    Log    Not yet in Parallel
+    [Documentation]    FAIL    Here we Fail
     : PARALLEL
     \    Fail    Here we Fail
     \    Nested Parallel With Fail
     \    Log    worker-2
-    Log    Not in Parallel anymore
 
 Parallel Failing 1
+    [Documentation]    FAIL    Here we Fail
     : PARALLEL
     \    Log    worker-1
     \    Fail    Here we Fail
 
 Parallel Failing 2
+    [Documentation]    FAIL    Here we Fail
     : PARALLEL
-    \    Fail    Here we Fail
+    \    Nested Parallel With Fail2
     \    Log    worker-1
 
 *** Keywords ***
@@ -54,3 +52,9 @@ Nested Parallel With Fail
     \    Log    worker-1.1
     \    Fail    Here we Fail
     \    Log    worker-1.2
+
+Nested Parallel With Fail2
+    : PARALLEL
+    \    Fail    Here we Fail
+    \    Sleep    1s
+

@@ -18,7 +18,6 @@ from .listeners import LibraryListeners, Listeners
 from .logger import LOGGER
 from .loggerhelper import AbstractLogger
 from .xmllogger import XmlLogger
-from robot.utils import lazy_writer
 
 
 class Output(AbstractLogger):
