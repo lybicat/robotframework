@@ -16,10 +16,34 @@ from robot.errors import (ExecutionFailed, ExecutionFailures, ExecutionPassed,
                           ExitForLoop, ContinueForLoop, DataError)
 from robot.result import Keyword as KeywordResult
 from robot.utils import (format_assign_message, frange, get_error_message,
-                         is_list_like, is_number, plural_or_not as s, type_name)
+                         is_list_like, is_number, plural_or_not as s, type_name, ParallelLogNode, post_order)
 from robot.variables import is_scalar_var
 
 from .statusreporter import StatusReporter
+
+from threading import Thread, current_thread
+
+from Queue import Queue
+
+namedQueue = {}
+
+
+class MyThread(Thread):
+    def __init__(self, bucket=None, group=None, target=None, name=None, args=(), kwargs={}):
+        self.parent = current_thread().name
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self.bucket = bucket
+        self._target = target
+        self._args = args
+        self._kwargs = kwargs
+
+    def run(self):
+        try:
+            self._target(*self._args, **self._kwargs)
+        except BaseException as e:
+            self.bucket.put(e)
+        finally:
+            del self._target, self._args, self._kwargs
 
 
 class StepRunner(object):
@@ -46,11 +70,12 @@ class StepRunner(object):
             raise ExecutionFailures(errors)
 
     def run_step(self, step, name=None):
+        if current_thread().name.startswith('Thread'):
+            ParallelLogNode(current_thread().parent).add_child(ParallelLogNode(current_thread().name))
         context = self._context
         if step.type == step.FOR_LOOP_TYPE:
             runner = ForRunner(context, self._templated, step.flavor)
             return runner.run(step)
-        # TODO: for parallel
         if step.type == step.PARALLEL_TYPE:
             runner = ParallelRunner(context, self._templated)
             return runner.run(step)
@@ -58,6 +83,35 @@ class StepRunner(object):
         if context.dry_run:
             return runner.dry_run(step, context)
         return runner.run(step, context)
+
+    def run_steps_parallel(self, steps):
+        errors = []
+        threads = []
+        bucket = Queue()
+        namedQueue[current_thread().name] = bucket
+        try:
+            for step in steps:
+                threads.append(MyThread(bucket=bucket, target=self.run_step, args=(step,)))
+            map(lambda x: x.start(), threads)
+            map(lambda x: x.join(), threads)
+            if current_thread().name == 'MainThread':
+                root = ParallelLogNode('MainThread')
+                post_order(root, root.children, self._context.output)
+                root.children = []
+                if not bucket.empty():
+                    raise bucket.get_nowait()
+            else:
+                if not bucket.empty():
+                    error = bucket.get_nowait()
+                    namedQueue[current_thread().parent].put(error)
+                    raise error
+        except ExecutionPassed as exception:
+            exception.set_earlier_failures(errors)
+            raise exception
+        except ExecutionFailed as exception:
+            errors.extend(exception.get_errors())
+        if errors:
+            raise ExecutionFailures(errors)
 
 
 def ForRunner(context, templated=False, flavor='IN'):
@@ -86,7 +140,7 @@ class ParallelRunner(object):
                                type=data.PARALLEL_TYPE)
         runner = StepRunner(self._context, self._templated)
         with StatusReporter(self._context, result):
-            runner.run_steps(data.keywords)
+            runner.run_steps_parallel(data.keywords)
 
 
 class ForInRunner(object):
